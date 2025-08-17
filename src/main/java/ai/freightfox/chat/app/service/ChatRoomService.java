@@ -9,15 +9,12 @@ import ai.freightfox.chat.app.util.RedisKeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-import jakarta.validation.constraints.NotBlank;
 
 import java.util.Map;
 import java.util.Set;
 
 @Slf4j
 @Service
-@Validated
 public class ChatRoomService {
 
     @Autowired

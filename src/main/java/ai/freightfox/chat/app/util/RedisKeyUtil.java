@@ -18,4 +18,8 @@ public class RedisKeyUtil {
     public static String getMessageRoomKey(String roomName) {
         return BASE_KEY + roomName + ":messages";
     }
+    
+    public static String getChannelKey(String roomName) {
+        return BASE_KEY + roomName + ":channel";
+    }
 }

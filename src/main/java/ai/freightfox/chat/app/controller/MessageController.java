@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/chatapp/chatrooms/{roomName}/messages")
