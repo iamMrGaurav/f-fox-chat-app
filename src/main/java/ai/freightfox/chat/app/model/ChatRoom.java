@@ -1,0 +1,32 @@
+package ai.freightfox.chat.app.model;
+
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ChatRoom {
+
+    private String roomId;
+    private String roomName;
+    private LocalDateTime createdAt;
+    private int participantCount;
+    private Set<String> participants;
+
+    public ChatRoom(String roomName) {
+        this.roomId = roomName;
+        this.roomName = roomName;
+        this.createdAt = LocalDateTime.now();
+        this.participantCount = 0;
+        this.participants = new HashSet<>();
+    }
+}
