@@ -1,5 +1,7 @@
 package ai.freightfox.chat.app.service;
 
+import ai.freightfox.chat.app.globalExceptionHandler.BadRequestException;
+import ai.freightfox.chat.app.globalExceptionHandler.ChatRoomNotFoundException;
 import ai.freightfox.chat.app.model.Message;
 import ai.freightfox.chat.app.repository.MessageRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,11 +20,17 @@ public class MessageService {
     private MessageRepository messageRepository;
 
     @Autowired
+    private ChatRoomService chatRoomService;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     private final String BASE_KEY = "chatroom:";
 
     public void saveMessage(String roomName, Message message) {
+
+        validateParam(roomName, message);
+
         try {
             if (message.getCreatedAt() == null) {
                 message.setCreatedAt(LocalDateTime.now());
@@ -36,24 +44,58 @@ public class MessageService {
         }
     }
 
+    private void validateParam(String roomName, Message message){
+        if (!chatRoomService.isRoomExists(roomName)) {
+            throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
+        }
+
+        if (message == null) {
+            throw new BadRequestException("Message cannot be null");
+        }
+
+        if (message.getParticipantName() == null || message.getParticipantName().trim().isEmpty()) {
+            throw new BadRequestException("Participant name cannot be empty");
+        }
+
+        if (message.getMessage() == null || message.getMessage().trim().isEmpty()) {
+            throw new BadRequestException("Message content cannot be empty");
+        }
+    }
+
     public void saveMessage(String roomName, String participant, String messageText) {
         Message message = new Message(participant, messageText, LocalDateTime.now());
         saveMessage(roomName, message);
     }
 
     public List<Message> getLastNMessages(String roomName, int limit) {
+        if (!chatRoomService.isRoomExists(roomName)) {
+            throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
+        }
+
+        if (limit <= 0) {
+            throw new BadRequestException("Limit must be greater than 0");
+        }
+
         String chatRoomKey = getChatRoomKey(roomName);
         List<Object> messageJsonList = messageRepository.getLastNMessages(chatRoomKey, limit);
         return convertJsonListToMessages(messageJsonList);
     }
 
     public List<Message> getAllMessages(String roomName) {
+        if (!chatRoomService.isRoomExists(roomName)) {
+            throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
+        }
+
         String chatRoomKey = getChatRoomKey(roomName);
         List<Object> messageJsonList = messageRepository.getAllMessages(chatRoomKey);
         return convertJsonListToMessages(messageJsonList);
     }
 
     public List<Message> getMessages(String roomName, Integer limit) {
+        if (!chatRoomService.isRoomExists(roomName)) {
+            throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
+        }
+
         if (limit != null && limit > 0) {
             return getLastNMessages(roomName, limit);
         } else {
