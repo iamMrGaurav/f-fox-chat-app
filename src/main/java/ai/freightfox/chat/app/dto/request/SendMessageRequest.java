@@ -14,4 +14,9 @@ public class SendMessageRequest {
     private String participant;
     private String message;
     private String roomName;
+
+    public SendMessageRequest(String participant, String message){
+        this.message = message;
+        this.participant = participant;
+    }
 }

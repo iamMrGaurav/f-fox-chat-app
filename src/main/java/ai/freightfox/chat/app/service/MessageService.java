@@ -4,6 +4,7 @@ import ai.freightfox.chat.app.globalExceptionHandler.BadRequestException;
 import ai.freightfox.chat.app.globalExceptionHandler.ChatRoomNotFoundException;
 import ai.freightfox.chat.app.model.Message;
 import ai.freightfox.chat.app.repository.MessageRepository;
+import ai.freightfox.chat.app.util.RedisKeyUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,6 @@ public class MessageService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final String BASE_KEY = "chatroom:";
 
     public void saveMessage(String roomName, Message message) {
 
@@ -36,7 +36,7 @@ public class MessageService {
                 message.setTimestamp(LocalDateTime.now());
             }
             
-            String chatRoomKey = getChatRoomKey(roomName);
+            String chatRoomKey = RedisKeyUtil.getMessageRoomKey(roomName);
             String messageJson = objectMapper.writeValueAsString(message);
             messageRepository.saveChat(chatRoomKey, messageJson);
         } catch (JsonProcessingException e) {
@@ -76,7 +76,7 @@ public class MessageService {
             throw new BadRequestException("Limit must be greater than 0");
         }
 
-        String chatRoomKey = getChatRoomKey(roomName);
+        String chatRoomKey = RedisKeyUtil.getMessageRoomKey(roomName);
         List<Object> messageJsonList = messageRepository.getLastNMessages(chatRoomKey, limit);
         return convertJsonListToMessages(messageJsonList);
     }
@@ -86,7 +86,7 @@ public class MessageService {
             throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
         }
 
-        String chatRoomKey = getChatRoomKey(roomName);
+        String chatRoomKey = RedisKeyUtil.getMessageRoomKey(roomName);
         List<Object> messageJsonList = messageRepository.getAllMessages(chatRoomKey);
         return convertJsonListToMessages(messageJsonList);
     }
@@ -116,7 +116,7 @@ public class MessageService {
     }
 
     public List<Message> getMessagesWithPagination(String roomName, int limit, int offset) {
-        String chatRoomKey = getChatRoomKey(roomName);
+        String chatRoomKey = RedisKeyUtil.getMessageRoomKey(roomName);
         List<Object> messageJsonList = messageRepository.getMessagesWithPagination(chatRoomKey, limit, offset);
         return convertJsonListToMessages(messageJsonList);
     }
@@ -125,7 +125,7 @@ public class MessageService {
         if (!chatRoomService.isRoomExists(roomName)) {
             throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
         }
-        String chatRoomKey = getChatRoomKey(roomName);
+        String chatRoomKey = RedisKeyUtil.getMessageRoomKey(roomName);
         return messageRepository.getMessageCount(chatRoomKey);
     }
 
@@ -145,7 +145,4 @@ public class MessageService {
         return messages;
     }
 
-    private String getChatRoomKey(String roomName) {
-        return BASE_KEY + roomName + ":messages";
-    }
 }

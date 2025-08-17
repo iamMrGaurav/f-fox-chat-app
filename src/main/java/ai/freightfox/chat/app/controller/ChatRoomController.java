@@ -6,12 +6,15 @@ import ai.freightfox.chat.app.dto.response.ChatRoomCreateResponse;
 import ai.freightfox.chat.app.service.ChatRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.constraints.NotBlank;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/chatapp/chatrooms/")
+@Validated
 public class ChatRoomController {
 
     @Autowired
@@ -43,7 +46,24 @@ public class ChatRoomController {
     }
 
     @DeleteMapping(value = "{roomId}")
-    public ResponseEntity<?> removeChatRoom(@PathVariable String roomId){
-        return ResponseEntity.ok("Hello World !!");
+    public ResponseEntity<ApiResponse> removeChatRoom(
+            @PathVariable @NotBlank(message = "Room ID cannot be empty") String roomId){
+
+        chatRoomService.removeRoom(roomId);
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage("Room '" + roomId + "' deleted successfully");
+        apiResponse.setStatus("Success");
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse> deleteWithoutRoomId(){
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage("Room ID is required for deletion");
+        apiResponse.setStatus("Error");
+
+        return ResponseEntity.badRequest().body(apiResponse);
     }
 }
