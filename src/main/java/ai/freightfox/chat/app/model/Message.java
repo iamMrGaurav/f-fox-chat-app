@@ -15,14 +15,15 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class Message {
     private String message;
-    private String participantName;
+    private String participant;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private LocalDateTime createdAt;
+    private LocalDateTime timestamp;
 
-    public Message(String participantName, String message){
-        this.participantName = participantName;
+    public Message(String participant, String message){
+        this.participant = participant;
         this.message = message;
-        this.createdAt = LocalDateTime.now();
+        this.timestamp = LocalDateTime.now();
     }
+
 }

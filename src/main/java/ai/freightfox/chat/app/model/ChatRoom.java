@@ -18,13 +18,11 @@ public class ChatRoom {
 
     private String roomName;
     private LocalDateTime createdAt;
-    private int participantCount;
     private Set<String> participants;
 
     public ChatRoom(String roomName) {
         this.roomName = roomName;
         this.createdAt = LocalDateTime.now();
-        this.participantCount = 0;
         this.participants = new HashSet<>();
     }
 }
