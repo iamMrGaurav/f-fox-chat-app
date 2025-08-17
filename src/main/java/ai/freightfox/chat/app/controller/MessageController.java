@@ -1,5 +1,6 @@
 package ai.freightfox.chat.app.controller;
 
+import ai.freightfox.chat.app.dto.request.SendMessageRequest;
 import ai.freightfox.chat.app.dto.response.ApiResponse;
 import ai.freightfox.chat.app.model.Message;
 import ai.freightfox.chat.app.service.MessageService;
@@ -22,11 +23,8 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> sendMessage(@PathVariable String roomName, @RequestBody Map<String, String> messageRequest) {
-        String participant = messageRequest.get("participant");
-        String messageText = messageRequest.get("message");
-
-        messageService.saveMessage(roomName, participant, messageText);
+    public ResponseEntity<ApiResponse> sendMessage(@PathVariable String roomName, @RequestBody SendMessageRequest messageRequest) {
+        messageService.saveMessage(roomName, messageRequest.getParticipant(), messageRequest.getMessage());
 
         ApiResponse response = new ApiResponse();
         response.setStatus("Success");

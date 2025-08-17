@@ -5,21 +5,24 @@ import ai.freightfox.chat.app.globalExceptionHandler.ChatRoomNotFoundException;
 import ai.freightfox.chat.app.globalExceptionHandler.ResourceAlreadyExistException;
 import ai.freightfox.chat.app.model.ChatRoom;
 import ai.freightfox.chat.app.repository.ChatRoomRepository;
+import ai.freightfox.chat.app.util.RedisKeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.Map;
 import java.util.Set;
 
 @Slf4j
 @Service
+@Validated
 public class ChatRoomService {
 
     @Autowired
     private ChatRoomRepository chatRoomRepository;
 
-    private final String BASE_KEY = "chatroom:";
 
     public void createChatRoom(String roomName) {
         if (isRoomExists(roomName)) {
@@ -33,17 +36,17 @@ public class ChatRoomService {
     }
 
     public void saveChatRoom(ChatRoom chatRoom) {
-        String hashKey = getRoomHashKey(chatRoom.getRoomName());
+        String hashKey = RedisKeyUtil.getRoomHashKey(chatRoom.getRoomName());
         chatRoomRepository.saveChatRoom(chatRoom.getRoomName(), chatRoom.getCreatedAt(), hashKey);
     }
 
     public boolean isRoomExists(String roomName) {
-        String hashKey = getRoomHashKey(roomName);
+        String hashKey = RedisKeyUtil.getRoomHashKey(roomName);
         return chatRoomRepository.isRoomExist(hashKey);
     }
 
     public Map<Object, Object> getChatRoomMetadata(String roomName) {
-        String hashKey = getRoomHashKey(roomName);
+        String hashKey = RedisKeyUtil.getRoomHashKey(roomName);
         return chatRoomRepository.getChatRoomMetaData(hashKey);
     }
 
@@ -56,8 +59,8 @@ public class ChatRoomService {
             throw new BadRequestException("Participant name cannot be empty");
         }
 
-        String participantRoomHashKey = getParticipantRoomHashKey(roomName);
-        String roomHashKey = getRoomHashKey(roomName);
+        String participantRoomHashKey = RedisKeyUtil.getParticipantRoomHashKey(roomName);
+        String roomHashKey = RedisKeyUtil.getRoomHashKey(roomName);
         chatRoomRepository.joinChatRoom(roomName, participantName.trim(), participantRoomHashKey, roomHashKey);
     }
 
@@ -70,8 +73,8 @@ public class ChatRoomService {
             throw new BadRequestException("Participant name cannot be empty");
         }
 
-        String participantRoomHashKey = getParticipantRoomHashKey(roomName);
-        String roomHashKey = getRoomHashKey(roomName);
+        String participantRoomHashKey = RedisKeyUtil.getParticipantRoomHashKey(roomName);
+        String roomHashKey = RedisKeyUtil.getRoomHashKey(roomName);
         return chatRoomRepository.removeParticipant(participantName.trim(), roomName, participantRoomHashKey, roomHashKey);
     }
 
@@ -80,7 +83,7 @@ public class ChatRoomService {
             throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
         }
         
-        String participantRoomHashKey = getParticipantRoomHashKey(roomName);
+        String participantRoomHashKey = RedisKeyUtil.getParticipantRoomHashKey(roomName);
         return chatRoomRepository.getParticipants(roomName, participantRoomHashKey);
     }
 
@@ -93,12 +96,12 @@ public class ChatRoomService {
             return false;
         }
 
-        String participantRoomHashKey = getParticipantRoomHashKey(roomName);
+        String participantRoomHashKey = RedisKeyUtil.getParticipantRoomHashKey(roomName);
         return chatRoomRepository.isParticipantInRoom(participantRoomHashKey, participantName.trim());
     }
 
     public long getParticipantCount(String roomName) {
-        String participantRoomHashKey = getParticipantRoomHashKey(roomName);
+        String participantRoomHashKey = RedisKeyUtil.getParticipantRoomHashKey(roomName);
         return chatRoomRepository.getParticipantCount(participantRoomHashKey);
     }
 
@@ -116,11 +119,32 @@ public class ChatRoomService {
         createChatRoom(roomName.trim());
     }
 
-    public String getRoomHashKey(String roomName){
-        return BASE_KEY + roomName;
+    public void removeRoom(String roomName){
+        String roomKey = RedisKeyUtil.getRoomHashKey(roomName);
+        String participantKey = RedisKeyUtil.getParticipantRoomHashKey(roomName);
+        String messageRoomKey = RedisKeyUtil.getMessageRoomKey(roomName);
+
+        Map<String, Boolean> keyExistence = Map.of(
+            "room", chatRoomRepository.isRoomExist(roomKey),
+            "participants", chatRoomRepository.isRoomExist(participantKey),
+            "messages", chatRoomRepository.isRoomExist(messageRoomKey)
+        );
+
+        if (!keyExistence.get("room")) {
+            throw new ChatRoomNotFoundException("Room '" + roomName + "' does not exist");
+        }
+
+        boolean allKeysExist = keyExistence.values().stream().allMatch(Boolean::booleanValue);
+
+        if (!allKeysExist) {
+            log.warn("Some keys missing for room {} - proceeding with deletion anyway: {}", roomName, keyExistence);
+        }
+
+        log.info("Deleting room {} - Key existence: {}", roomName, keyExistence);
+        
+        chatRoomRepository.removeRemoveRoomData(roomKey, participantKey, messageRoomKey);
+        
+        log.info("Successfully deleted room '{}'", roomName);
     }
 
-    public String getParticipantRoomHashKey(String roomName){
-        return BASE_KEY + roomName + ":participants";
-    }
 }

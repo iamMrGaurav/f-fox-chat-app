@@ -8,6 +8,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,7 +56,6 @@ public class ChatRoomRepository {
                 throw new ResourceAlreadyExistException("User already in room");
             }
         } catch (ResourceAlreadyExistException e) {
-            // Re-throw business logic exceptions as-is
             throw e;
         } catch (Exception e) {
             log.error("Redis operation failed for addParticipant: {}", e.getMessage());
@@ -92,6 +93,15 @@ public class ChatRoomRepository {
         } catch (Exception e) {
             log.error("Redis operation failed for isParticipantInRoom: {}", e.getMessage());
             throw new RedisOperationException("Failed to check participant membership", e);
+        }
+    }
+
+    public void removeRemoveRoomData(String roomKey, String participantRoomKey, String messageRoomKey){
+        try{
+            redisTemplate.delete(Arrays.asList(roomKey, participantRoomKey, messageRoomKey));
+        }catch (Exception e){
+            log.error("Redis operation failed for deleteRoom: {}", e.getMessage());
+            throw new RedisOperationException("Failed to Delete Chat Room Data", e);
         }
     }
 
