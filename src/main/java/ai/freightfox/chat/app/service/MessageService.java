@@ -26,6 +26,9 @@ public class MessageService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private MessagePublisher messagePublisher;
+
 
     public void saveMessage(String roomName, Message message) {
 
@@ -39,6 +42,8 @@ public class MessageService {
             String chatRoomKey = RedisKeyUtil.getMessageRoomKey(roomName);
             String messageJson = objectMapper.writeValueAsString(message);
             messageRepository.saveChat(chatRoomKey, messageJson);
+
+            messagePublisher.publishMessage(roomName, message);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to save message: " + e.getMessage(), e);
         }
@@ -63,7 +68,7 @@ public class MessageService {
     }
 
     public void saveMessage(String roomName, String participant, String messageText) {
-        Message message = new Message(messageText, participant, LocalDateTime.now());
+        Message message = new Message(participant, messageText);
         saveMessage(roomName, message);
     }
 
