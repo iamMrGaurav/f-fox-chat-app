@@ -16,14 +16,12 @@ import java.util.Set;
 @Builder
 public class ChatRoom {
 
-    private String roomId;
     private String roomName;
     private LocalDateTime createdAt;
     private int participantCount;
     private Set<String> participants;
 
     public ChatRoom(String roomName) {
-        this.roomId = roomName;
         this.roomName = roomName;
         this.createdAt = LocalDateTime.now();
         this.participantCount = 0;
