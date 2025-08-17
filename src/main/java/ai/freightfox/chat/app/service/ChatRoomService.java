@@ -1,5 +1,8 @@
 package ai.freightfox.chat.app.service;
 
+import ai.freightfox.chat.app.globalExceptionHandler.BadRequestException;
+import ai.freightfox.chat.app.globalExceptionHandler.ChatRoomNotFoundException;
+import ai.freightfox.chat.app.globalExceptionHandler.ResourceAlreadyExistException;
 import ai.freightfox.chat.app.model.ChatRoom;
 import ai.freightfox.chat.app.repository.ChatRoomRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -18,16 +21,15 @@ public class ChatRoomService {
 
     private final String BASE_KEY = "chatroom:";
 
-    public ChatRoom createChatRoom(String roomName) {
+    public void createChatRoom(String roomName) {
         if (isRoomExists(roomName)) {
-            throw new RuntimeException("Chat room '" + roomName + "' already exists");
+            throw new ResourceAlreadyExistException("Chat room '" + roomName + "' already exists");
         }
 
         ChatRoom chatRoom = new ChatRoom(roomName);
 
         saveChatRoom(chatRoom);
         log.info("Chat room: {} created successfully",  roomName);
-        return chatRoom;
     }
 
     public void saveChatRoom(ChatRoom chatRoom) {
@@ -47,11 +49,11 @@ public class ChatRoomService {
 
     public boolean addParticipant(String roomName, String participantName) {
         if (!isRoomExists(roomName)) {
-            throw new RuntimeException("Chat room '" + roomName + "' does not exist");
+            throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
         }
 
         if (participantName == null || participantName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Participant name cannot be empty");
+            throw new BadRequestException("Participant name cannot be empty");
         }
 
         String participantRoomHashKey = getParticipantRoomHashKey(roomName);
@@ -61,11 +63,11 @@ public class ChatRoomService {
 
     public boolean removeParticipant(String roomName, String participantName) {
         if (!isRoomExists(roomName)) {
-            throw new RuntimeException("Chat room '" + roomName + "' does not exist");
+            throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
         }
 
         if (participantName == null || participantName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Participant name cannot be empty");
+            throw new BadRequestException("Participant name cannot be empty");
         }
 
         String participantRoomHashKey = getParticipantRoomHashKey(roomName);
@@ -75,7 +77,7 @@ public class ChatRoomService {
 
     public Set<Object> getParticipants(String roomName) {
         if (!isRoomExists(roomName)) {
-            throw new RuntimeException("Chat room '" + roomName + "' does not exist");
+            throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
         }
         
         String participantRoomHashKey = getParticipantRoomHashKey(roomName);
@@ -102,11 +104,11 @@ public class ChatRoomService {
                 roomName.matches("^[a-zA-Z0-9_-]+$");
     }
 
-    public ChatRoom createValidatedChatRoom(String roomName) {
+    public void createValidatedChatRoom(String roomName) {
         if (!isValidRoomName(roomName)) {
-            throw new IllegalArgumentException("Invalid room name, Must be 3-50 characters, alphanumeric, underscore, or hyphen only.");
+            throw new BadRequestException("Invalid room name, Must be 3-50 characters, alphanumeric, underscore, or hyphen only.");
         }
-        return createChatRoom(roomName.trim());
+        createChatRoom(roomName.trim());
     }
 
     public String getRoomHashKey(String roomName){
