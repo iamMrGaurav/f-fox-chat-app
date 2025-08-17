@@ -32,8 +32,8 @@ public class MessageService {
         validateParam(roomName, message);
 
         try {
-            if (message.getCreatedAt() == null) {
-                message.setCreatedAt(LocalDateTime.now());
+            if (message.getTimestamp() == null) {
+                message.setTimestamp(LocalDateTime.now());
             }
             
             String chatRoomKey = getChatRoomKey(roomName);
@@ -53,7 +53,7 @@ public class MessageService {
             throw new BadRequestException("Message cannot be null");
         }
 
-        if (message.getParticipantName() == null || message.getParticipantName().trim().isEmpty()) {
+        if (message.getParticipant() == null || message.getParticipant().trim().isEmpty()) {
             throw new BadRequestException("Participant name cannot be empty");
         }
 
@@ -63,7 +63,7 @@ public class MessageService {
     }
 
     public void saveMessage(String roomName, String participant, String messageText) {
-        Message message = new Message(participant, messageText, LocalDateTime.now());
+        Message message = new Message(messageText, participant, LocalDateTime.now());
         saveMessage(roomName, message);
     }
 
@@ -101,6 +101,32 @@ public class MessageService {
         } else {
             return getAllMessages(roomName);
         }
+    }
+
+    public List<Message> getMessages(String roomName, Integer limit, Integer offset) {
+        if (!chatRoomService.isRoomExists(roomName)) {
+            throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
+        }
+
+        if (limit != null && limit > 0) {
+            return getMessagesWithPagination(roomName, limit, offset);
+        } else {
+            return getAllMessages(roomName);
+        }
+    }
+
+    public List<Message> getMessagesWithPagination(String roomName, int limit, int offset) {
+        String chatRoomKey = getChatRoomKey(roomName);
+        List<Object> messageJsonList = messageRepository.getMessagesWithPagination(chatRoomKey, limit, offset);
+        return convertJsonListToMessages(messageJsonList);
+    }
+
+    public long getTotalMessageCount(String roomName) {
+        if (!chatRoomService.isRoomExists(roomName)) {
+            throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
+        }
+        String chatRoomKey = getChatRoomKey(roomName);
+        return messageRepository.getMessageCount(chatRoomKey);
     }
 
 

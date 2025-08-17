@@ -34,7 +34,7 @@ public class ChatRoomService {
 
     public void saveChatRoom(ChatRoom chatRoom) {
         String hashKey = getRoomHashKey(chatRoom.getRoomName());
-        chatRoomRepository.saveChatRoom(chatRoom.getRoomName(), chatRoom.getCreatedAt(), chatRoom.getParticipantCount(), hashKey);
+        chatRoomRepository.saveChatRoom(chatRoom.getRoomName(), chatRoom.getCreatedAt(), hashKey);
     }
 
     public boolean isRoomExists(String roomName) {
@@ -47,7 +47,7 @@ public class ChatRoomService {
         return chatRoomRepository.getChatRoomMetaData(hashKey);
     }
 
-    public boolean addParticipant(String roomName, String participantName) {
+    public void joinChatRoom(String roomName, String participantName) {
         if (!isRoomExists(roomName)) {
             throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
         }
@@ -58,7 +58,7 @@ public class ChatRoomService {
 
         String participantRoomHashKey = getParticipantRoomHashKey(roomName);
         String roomHashKey = getRoomHashKey(roomName);
-        return chatRoomRepository.addParticipant(roomName, participantName.trim(), participantRoomHashKey, roomHashKey);
+        chatRoomRepository.joinChatRoom(roomName, participantName.trim(), participantRoomHashKey, roomHashKey);
     }
 
     public boolean removeParticipant(String roomName, String participantName) {
@@ -95,6 +95,11 @@ public class ChatRoomService {
 
         String participantRoomHashKey = getParticipantRoomHashKey(roomName);
         return chatRoomRepository.isParticipantInRoom(participantRoomHashKey, participantName.trim());
+    }
+
+    public long getParticipantCount(String roomName) {
+        String participantRoomHashKey = getParticipantRoomHashKey(roomName);
+        return chatRoomRepository.getParticipantCount(participantRoomHashKey);
     }
 
     public boolean isValidRoomName(String roomName) {
