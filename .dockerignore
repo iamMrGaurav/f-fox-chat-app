@@ -1,0 +1,9 @@
+target/
+!target/*.jar
+!target/**/lib/
+*.md
+.git
+.gitignore
+node_modules/
+npm-debug.log
+*.log

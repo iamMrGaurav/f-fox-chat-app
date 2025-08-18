@@ -42,11 +42,6 @@ public class ChatRoomService {
         return chatRoomRepository.isRoomExist(hashKey);
     }
 
-    public Map<Object, Object> getChatRoomMetadata(String roomName) {
-        String hashKey = RedisKeyUtil.getRoomHashKey(roomName);
-        return chatRoomRepository.getChatRoomMetaData(hashKey);
-    }
-
     public void joinChatRoom(String roomName, String participantName) {
         if (!isRoomExists(roomName)) {
             throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
@@ -86,15 +81,15 @@ public class ChatRoomService {
 
     public boolean isParticipantInRoom(String roomName, String participantName) {
         if (!isRoomExists(roomName)) {
-            return true;
+            return false;
         }
 
         if (participantName == null || participantName.trim().isEmpty()) {
-            return true;
+            return false;
         }
 
         String participantRoomHashKey = RedisKeyUtil.getParticipantRoomHashKey(roomName);
-        return !chatRoomRepository.isParticipantInRoom(participantRoomHashKey, participantName.trim());
+        return chatRoomRepository.isParticipantInRoom(participantRoomHashKey, participantName.trim());
     }
 
     public long getParticipantCount(String roomName) {
