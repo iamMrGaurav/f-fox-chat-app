@@ -96,7 +96,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
                             return false;
                         }
 
-                        if (chatRoomService.isParticipantInRoom(roomName, participantName)) {
+                        if (!chatRoomService.isParticipantInRoom(roomName, participantName)) {
                             log.warn("Raw WS: Connection blocked - user '{}' is not a member of room '{}'", participantName, roomName);
                             response.setStatusCode(HttpStatus.FORBIDDEN);
                             response.getHeaders().add("X-Error-Message", "You are not a member of room '" + roomName + "'");

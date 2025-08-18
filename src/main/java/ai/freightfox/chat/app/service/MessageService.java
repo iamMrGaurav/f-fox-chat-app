@@ -67,8 +67,8 @@ public class MessageService {
             throw new BadRequestException("Message content cannot be empty");
         }
 
-        if(chatRoomService.isParticipantInRoom(roomName, messageModel.getParticipant()))
-            throw new ParticipantNotFoundException("Participant Does not exist");
+        if(!chatRoomService.isParticipantInRoom(roomName, messageModel.getParticipant()))
+            throw new ParticipantNotFoundException("Participant '" + messageModel.getParticipant() + "' is not a member of room '" + roomName + "'");
     }
 
     public void saveMessage(String roomName, String participant, String messageText) {

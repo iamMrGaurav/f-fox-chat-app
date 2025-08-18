@@ -1,5 +1,7 @@
 HELP.md
+
 start-redis.sh
+deploy-to-eks-india.sh
 
 target/
 .mvn/wrapper/maven-wrapper.jar
