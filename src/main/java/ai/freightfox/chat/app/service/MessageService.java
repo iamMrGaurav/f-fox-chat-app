@@ -1,7 +1,8 @@
 package ai.freightfox.chat.app.service;
 
-import ai.freightfox.chat.app.globalExceptionHandler.BadRequestException;
-import ai.freightfox.chat.app.globalExceptionHandler.ChatRoomNotFoundException;
+import ai.freightfox.chat.app.globalExceptionHandler.exceptionHandlers.BadRequestException;
+import ai.freightfox.chat.app.globalExceptionHandler.exceptionHandlers.ChatRoomNotFoundException;
+import ai.freightfox.chat.app.globalExceptionHandler.exceptionHandlers.ParticipantNotFoundException;
 import ai.freightfox.chat.app.model.MessageModel;
 import ai.freightfox.chat.app.repository.MessageRepository;
 import ai.freightfox.chat.app.util.RedisKeyUtil;
@@ -65,6 +66,9 @@ public class MessageService {
         if (messageModel.getMessage() == null || messageModel.getMessage().trim().isEmpty()) {
             throw new BadRequestException("Message content cannot be empty");
         }
+
+        if(chatRoomService.isParticipantInRoom(roomName, messageModel.getParticipant()))
+            throw new ParticipantNotFoundException("Participant Does not exist");
     }
 
     public void saveMessage(String roomName, String participant, String messageText) {

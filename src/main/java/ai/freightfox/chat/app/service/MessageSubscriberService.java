@@ -4,10 +4,8 @@ import ai.freightfox.chat.app.model.MessageModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -18,8 +16,7 @@ public class MessageSubscriberService implements MessageListener {
     private ObjectMapper objectMapper;
 
     @Autowired
-    @Lazy
-    SimpMessagingTemplate messagingTemplate;
+    private WebSocketSessionManager sessionManager;
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
@@ -33,8 +30,9 @@ public class MessageSubscriberService implements MessageListener {
             MessageModel deserializedMessageModel = objectMapper.readValue(body, MessageModel.class);
 
             if (roomName != null) {
-                log.info("Broadcasting message from {} to room {}", deserializedMessageModel.getParticipant(), roomName);
-                messagingTemplate.convertAndSend("/freight-fox/" + roomName, deserializedMessageModel);
+                log.info("Broadcasting message from {} to room {} on pod {}", 
+                        deserializedMessageModel.getParticipant(), roomName, sessionManager.getPodInstanceId());
+                sessionManager.broadcastToLocalSessions(roomName, deserializedMessageModel);
             }
 
         } catch (Exception e) {

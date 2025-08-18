@@ -4,6 +4,8 @@ package ai.freightfox.chat.app.controller;
 import ai.freightfox.chat.app.dto.response.ApiResponse;
 import ai.freightfox.chat.app.dto.response.ChatRoomCreateResponse;
 import ai.freightfox.chat.app.service.ChatRoomService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,6 +23,7 @@ public class ChatRoomController {
     private ChatRoomService chatRoomService;
 
     // Create Chat Room
+    @Operation(summary = "Create Chat Room")
     @PostMapping
     public ResponseEntity<ChatRoomCreateResponse> createChatRoom(@RequestBody Map<String, String> roomRequest){
         String roomName = roomRequest.get("roomName");
@@ -34,6 +37,7 @@ public class ChatRoomController {
 
 
     // User Join the Chat Room
+    @Operation(summary = "Join Chat Room")
     @PostMapping(value = "{roomId}/join")
     public ResponseEntity<ApiResponse> joinChatRoom(@RequestBody Map<String , String> joinRoomRequest, @PathVariable String roomId){
         String participantName = joinRoomRequest.get("participant");
@@ -50,6 +54,7 @@ public class ChatRoomController {
 
 
     // Remove the Chat Room
+    @Operation(summary = "Remove Chat Room")
     @DeleteMapping(value = "{roomId}")
     public ResponseEntity<ApiResponse> removeChatRoom(
             @PathVariable @NotBlank(message = "Room ID cannot be empty") String roomId){
@@ -65,6 +70,7 @@ public class ChatRoomController {
 
 
     // To Handle Delete mapping request without room Id
+    @Hidden
     @DeleteMapping
     public ResponseEntity<ApiResponse> deleteWithoutRoomId(){
         ApiResponse apiResponse = new ApiResponse();
