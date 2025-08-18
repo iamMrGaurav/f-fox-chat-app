@@ -1,48 +1,18 @@
-# FreightFox Chat Application
-
-A real-time WebSocket chat application built with Spring Boot, Redis pub/sub, and deployed on AWS EKS with auto-scaling capabilities.
-
-## Features Implemented
-
-### **Chat Rooms**
-- **Create chat rooms** with unique names
-- **Join existing chat rooms** with participant validation
-- **Room management** with proper error handling for duplicates
-
-### **Messaging** 
-- **Send and retrieve messages** in chat rooms
-- **Store messages in Redis** using Redis List data structure
-- **Retrieve last N messages** from any chat room
-- **Message persistence** with Redis durability
-
-### **Real-time Messaging**
-- **Redis Pub/Sub** for instant message delivery across all connected users
-- **WebSocket connections** for real-time bidirectional communication
-- **Multi-pod support** for horizontal scaling
-
-### **Error Handling**
-- **Duplicate chat room names** - Prevents creation of rooms with existing names
-- **Non-existent chat rooms** - Validates room existence before allowing messages
-- **Invalid participants** - Ensures only joined users can send messages
-- **Connection failures** - Graceful handling of WebSocket disconnections
-
-### **Persistence & Durability**
-- **Redis persistence** with snapshots and append-only file (AOF)
-- **Message history** stored permanently in Redis Lists
-- **Session management** with Redis for multi-pod deployments
+# F-Fox Chat Application
 
 ## Live Demo
 
-**Hosted URL (India - Mumbai):**
+**Hosted URL Domain Name:**
 ```
 http://af89a7a02e53d467fbb316f5173ee150-446467663.ap-south-1.elb.amazonaws.com
 ```
 
 **Test the API:**
-- **Health Check**: [/health](http://af89a7a02e53d467fbb316f5173ee150-446467663.ap-south-1.elb.amazonaws.com/health)
+
 - **Swagger UI**: [/swagger-ui/index.html](http://af89a7a02e53d467fbb316f5173ee150-446467663.ap-south-1.elb.amazonaws.com/swagger-ui/index.html)
 - **Create Room**: POST `/api/chatapp/chatrooms/`
 - **WebSocket**: `ws://af89a7a02e53d467fbb316f5173ee150-446467663.ap-south-1.elb.amazonaws.com/ws?room=test&participant=user`
+- **Health Check**: [/health](http://af89a7a02e53d467fbb316f5173ee150-446467663.ap-south-1.elb.amazonaws.com/health)
 
 ## Postman Collections
 
@@ -73,7 +43,7 @@ curl -X POST http://af89a7a02e53d467fbb316f5173ee150-446467663.ap-south-1.elb.am
 - Docker & Docker Compose
 - Java 21 (for development)
 
-### Option 1: Quick Start with Docker Compose
+### Step: Quick Start with Docker Compose
 ```bash
 # 1. Clone the repository
 git clone <your-repo-url>
@@ -85,33 +55,6 @@ docker-compose -f redis-docker-compose.yml up -d
 # 3. Build and run the application
 ./mvnw spring-boot:run
 ```
-
-### Option 2: Full Docker Setup
-```bash
-# 1. Start Redis
-docker-compose -f redis-docker-compose.yml up -d
-
-# 2. Build Docker image
-docker build -t freight-fox-chat .
-
-# 3. Run the application
-docker run -p 8080:8080 \
-  -e SPRING_DATA_REDIS_HOST=host.docker.internal \
-  -e SPRING_DATA_REDIS_PORT=6379 \
-  freight-fox-chat
-```
-
-### Option 3: Development Setup
-```bash
-# 1. Start Redis
-docker-compose -f redis-docker-compose.yml up -d
-
-# 2. Run application in development mode
-./mvnw spring-boot:run
-
-# Application will be available at: http://localhost:8080
-```
-
 
 ## API Endpoints
 
@@ -178,52 +121,37 @@ curl http://af89a7a02e53d467fbb316f5173ee150-446467663.ap-south-1.elb.amazonaws.
 curl http://localhost:8080/health
 ```
 
-## Troubleshooting
-
-### Common Issues
-
-1. **Redis Connection Failed**
-   ```bash
-   # Check Redis is running
-   docker ps | grep redis
-   
-   # Restart Redis
-   docker-compose -f redis-docker-compose.yml restart
-   ```
-
-2. **WebSocket Connection Issues**
-   - Ensure room exists and participant has joined
-   - Check browser console for error messages
-   - Verify WebSocket URL format
-
-3. **Application Won't Start**
-   ```bash
-   # Check Java version
-   java -version  # Should be 21+
-   
-   # Clean and rebuild
-   ./mvnw clean package
-   ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
-
----
-
-**Made with passion for real-time chat communication**
-
 **Quick Links:**
 - [Live Demo](http://af89a7a02e53d467fbb316f5173ee150-446467663.ap-south-1.elb.amazonaws.com)
 - [Health Check](http://af89a7a02e53d467fbb316f5173ee150-446467663.ap-south-1.elb.amazonaws.com/health)
 - [Swagger UI](http://af89a7a02e53d467fbb316f5173ee150-446467663.ap-south-1.elb.amazonaws.com/swagger-ui/index.html)
 - [REST API Postman Collection](./postman-collection.json)
 - [WebSocket Postman Collection](https://orange-station-108385.postman.co/workspace/My-Workspace~e5aa16b9-1b4b-4a85-8c59-9deb007b20c1/collection/67fbd689be3dfe9bc0f646f5?action=share&creator=23006953)
+
+## Features Implemented
+
+### **Chat Rooms**
+- **Create chat rooms** with unique names
+- **Join existing chat rooms** with participant validation
+- **Room management** with proper error handling for duplicates
+
+### **Messaging**
+- **Send and retrieve messages** in chat rooms
+- **Store messages in Redis** using Redis List data structure
+- **Retrieve last N messages** from any chat room
+- **Message persistence** with Redis durability
+
+### **Real-time Messaging**
+- **Redis Pub/Sub** for instant message delivery across all connected users
+- **WebSocket connections** for real-time bidirectional communication
+- **Multi-pod support** for horizontal scaling
+
+### **Error Handling**
+- **Duplicate chat room names** - Prevents creation of rooms with existing names
+- **Non-existent chat rooms** - Validates room existence before allowing messages
+- **Invalid participants** - Ensures only joined users can send messages
+- **Connection failures** - Graceful handling of WebSocket disconnections
+
+### **Persistence & Durability**
+- **Redis persistence** with snapshots and append-only file (AOF)
+- **Message history** stored permanently in Redis Lists
