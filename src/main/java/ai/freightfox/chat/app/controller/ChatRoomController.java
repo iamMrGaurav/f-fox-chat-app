@@ -20,6 +20,7 @@ public class ChatRoomController {
     @Autowired
     private ChatRoomService chatRoomService;
 
+    // Create Chat Room
     @PostMapping
     public ResponseEntity<ChatRoomCreateResponse> createChatRoom(@RequestBody Map<String, String> roomRequest){
         String roomName = roomRequest.get("roomName");
@@ -31,6 +32,8 @@ public class ChatRoomController {
         return ResponseEntity.ok(response);
     }
 
+
+    // User Join the Chat Room
     @PostMapping(value = "{roomId}/join")
     public ResponseEntity<ApiResponse> joinChatRoom(@RequestBody Map<String , String> joinRoomRequest, @PathVariable String roomId){
         String participantName = joinRoomRequest.get("participant");
@@ -45,6 +48,8 @@ public class ChatRoomController {
         return ResponseEntity.ok(apiResponse);
     }
 
+
+    // Remove the Chat Room
     @DeleteMapping(value = "{roomId}")
     public ResponseEntity<ApiResponse> removeChatRoom(
             @PathVariable @NotBlank(message = "Room ID cannot be empty") String roomId){
@@ -58,6 +63,8 @@ public class ChatRoomController {
         return ResponseEntity.ok(apiResponse);
     }
 
+
+    // To Handle Delete mapping request without room Id
     @DeleteMapping
     public ResponseEntity<ApiResponse> deleteWithoutRoomId(){
         ApiResponse apiResponse = new ApiResponse();
