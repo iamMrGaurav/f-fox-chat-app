@@ -12,13 +12,13 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatRoom {
+public class ChatRoomModel {
 
     private String roomName;
     private LocalDateTime createdAt;
     private Set<String> participants;
 
-    public ChatRoom(String roomName) {
+    public ChatRoomModel(String roomName) {
         this.roomName = roomName;
         this.createdAt = LocalDateTime.now();
         this.participants = new HashSet<>();

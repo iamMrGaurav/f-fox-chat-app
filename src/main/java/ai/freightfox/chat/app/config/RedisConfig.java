@@ -1,7 +1,7 @@
 package ai.freightfox.chat.app.config;
 
 
-import ai.freightfox.chat.app.service.MessageSubscriber;
+import ai.freightfox.chat.app.service.MessageSubscriberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
     @Autowired
-    private MessageSubscriber messageSubscriber;
+    private MessageSubscriberService messageSubscriber;
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory){

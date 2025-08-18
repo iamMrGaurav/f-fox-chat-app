@@ -2,7 +2,7 @@ package ai.freightfox.chat.app.service;
 
 import ai.freightfox.chat.app.globalExceptionHandler.BadRequestException;
 import ai.freightfox.chat.app.globalExceptionHandler.ChatRoomNotFoundException;
-import ai.freightfox.chat.app.model.Message;
+import ai.freightfox.chat.app.model.MessageModel;
 import ai.freightfox.chat.app.repository.MessageRepository;
 import ai.freightfox.chat.app.util.RedisKeyUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,52 +27,52 @@ public class MessageService {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private MessagePublisher messagePublisher;
+    private MessagePublisherService messagePublisher;
 
 
-    public void saveMessage(String roomName, Message message) {
+    public void saveMessage(String roomName, MessageModel messageModel) {
 
-        validateParam(roomName, message);
+        validateParam(roomName, messageModel);
 
         try {
-            if (message.getTimestamp() == null) {
-                message.setTimestamp(LocalDateTime.now());
+            if (messageModel.getTimestamp() == null) {
+                messageModel.setTimestamp(LocalDateTime.now());
             }
             
             String chatRoomKey = RedisKeyUtil.getMessageRoomKey(roomName);
-            String messageJson = objectMapper.writeValueAsString(message);
+            String messageJson = objectMapper.writeValueAsString(messageModel);
             messageRepository.saveChat(chatRoomKey, messageJson);
 
-            messagePublisher.publishMessage(roomName, message);
+            messagePublisher.publishMessage(roomName, messageModel);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to save message: " + e.getMessage(), e);
         }
     }
 
-    private void validateParam(String roomName, Message message){
+    private void validateParam(String roomName, MessageModel messageModel){
         if (!chatRoomService.isRoomExists(roomName)) {
             throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
         }
 
-        if (message == null) {
+        if (messageModel == null) {
             throw new BadRequestException("Message cannot be null");
         }
 
-        if (message.getParticipant() == null || message.getParticipant().trim().isEmpty()) {
+        if (messageModel.getParticipant() == null || messageModel.getParticipant().trim().isEmpty()) {
             throw new BadRequestException("Participant name cannot be empty");
         }
 
-        if (message.getMessage() == null || message.getMessage().trim().isEmpty()) {
+        if (messageModel.getMessage() == null || messageModel.getMessage().trim().isEmpty()) {
             throw new BadRequestException("Message content cannot be empty");
         }
     }
 
     public void saveMessage(String roomName, String participant, String messageText) {
-        Message message = new Message(participant, messageText);
-        saveMessage(roomName, message);
+        MessageModel messageModel = new MessageModel(participant, messageText);
+        saveMessage(roomName, messageModel);
     }
 
-    public List<Message> getLastNMessages(String roomName, int limit) {
+    public List<MessageModel> getLastNMessages(String roomName, int limit) {
         if (!chatRoomService.isRoomExists(roomName)) {
             throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
         }
@@ -86,7 +86,7 @@ public class MessageService {
         return convertJsonListToMessages(messageJsonList);
     }
 
-    public List<Message> getAllMessages(String roomName) {
+    public List<MessageModel> getAllMessages(String roomName) {
         if (!chatRoomService.isRoomExists(roomName)) {
             throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
         }
@@ -96,7 +96,7 @@ public class MessageService {
         return convertJsonListToMessages(messageJsonList);
     }
 
-    public List<Message> getMessages(String roomName, Integer limit) {
+    public List<MessageModel> getMessages(String roomName, Integer limit) {
         if (!chatRoomService.isRoomExists(roomName)) {
             throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
         }
@@ -108,7 +108,7 @@ public class MessageService {
         }
     }
 
-    public List<Message> getMessages(String roomName, Integer limit, Integer offset) {
+    public List<MessageModel> getMessages(String roomName, Integer limit, Integer offset) {
         if (!chatRoomService.isRoomExists(roomName)) {
             throw new ChatRoomNotFoundException("Chat room '" + roomName + "' does not exist");
         }
@@ -120,7 +120,7 @@ public class MessageService {
         }
     }
 
-    public List<Message> getMessagesWithPagination(String roomName, int limit, int offset) {
+    public List<MessageModel> getMessagesWithPagination(String roomName, int limit, int offset) {
         String chatRoomKey = RedisKeyUtil.getMessageRoomKey(roomName);
         List<Object> messageJsonList = messageRepository.getMessagesWithPagination(chatRoomKey, limit, offset);
         return convertJsonListToMessages(messageJsonList);
@@ -135,19 +135,19 @@ public class MessageService {
     }
 
 
-    private List<Message> convertJsonListToMessages(List<Object> messageJsonList) {
-        List<Message> messages = new ArrayList<>();
+    private List<MessageModel> convertJsonListToMessages(List<Object> messageJsonList) {
+        List<MessageModel> messageModels = new ArrayList<>();
         if (messageJsonList != null) {
             for (Object messageJson : messageJsonList) {
                 try {
-                    Message message = objectMapper.readValue((String) messageJson, Message.class);
-                    messages.add(message);
+                    MessageModel messageModel = objectMapper.readValue((String) messageJson, MessageModel.class);
+                    messageModels.add(messageModel);
                 } catch (Exception e) {
                     System.err.println("Warning: Skipping malformed message: " + messageJson + ", Error: " + e.getMessage());
                 }
             }
         }
-        return messages;
+        return messageModels;
     }
 
 }

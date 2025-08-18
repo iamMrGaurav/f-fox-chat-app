@@ -11,11 +11,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Participant {
+public class ParticipantModel {
     private String username;
     private LocalDateTime joinedAt;
     
-    public Participant(String username) {
+    public ParticipantModel(String username) {
         this.username = username;
         this.joinedAt = LocalDateTime.now();
     }
