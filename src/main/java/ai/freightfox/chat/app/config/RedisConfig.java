@@ -40,6 +40,7 @@ public class RedisConfig {
         return template;
     }
 
+    // To Support Redis Listener
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory){
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
