@@ -1,5 +1,6 @@
 package ai.freightfox.chat.app.service;
 
+import ai.freightfox.chat.app.model.MessageModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class MessageSubscriber implements MessageListener {
+public class MessageSubscriberService implements MessageListener {
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -29,11 +30,11 @@ public class MessageSubscriber implements MessageListener {
             // Extract room name from channel where the format is chatroom:roomName:channel
             String roomName = extractRoomNameFromChannel(channel);
             
-            ai.freightfox.chat.app.model.Message deserializedMessage = objectMapper.readValue(body, ai.freightfox.chat.app.model.Message.class);
+            MessageModel deserializedMessageModel = objectMapper.readValue(body, MessageModel.class);
 
             if (roomName != null) {
-                log.info("Broadcasting message from {} to room {}", deserializedMessage.getParticipant(), roomName);
-                messagingTemplate.convertAndSend("/freight-fox/" + roomName, deserializedMessage);
+                log.info("Broadcasting message from {} to room {}", deserializedMessageModel.getParticipant(), roomName);
+                messagingTemplate.convertAndSend("/freight-fox/" + roomName, deserializedMessageModel);
             }
 
         } catch (Exception e) {

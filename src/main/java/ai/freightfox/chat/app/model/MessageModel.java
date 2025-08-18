@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @NoArgsConstructor
-public class Message {
+public class MessageModel {
     @JsonProperty("message")
     private String message;
 
@@ -18,7 +18,7 @@ public class Message {
     @JsonProperty("timestamp")
     private LocalDateTime timestamp;
 
-    public Message(String participant, String message){
+    public MessageModel(String participant, String message){
         this.participant = participant;
         this.message = message;
         this.timestamp = LocalDateTime.now();

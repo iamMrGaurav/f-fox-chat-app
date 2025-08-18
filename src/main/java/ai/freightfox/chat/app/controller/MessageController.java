@@ -2,7 +2,7 @@ package ai.freightfox.chat.app.controller;
 
 import ai.freightfox.chat.app.dto.request.SendMessageRequest;
 import ai.freightfox.chat.app.dto.response.ApiResponse;
-import ai.freightfox.chat.app.model.Message;
+import ai.freightfox.chat.app.model.MessageModel;
 import ai.freightfox.chat.app.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,11 +33,11 @@ public class MessageController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Message>> getMessages(
+    public ResponseEntity<List<MessageModel>> getMessages(
             @PathVariable String roomName, 
             @RequestParam(required = false) @Min(value = 1, message = "Limit must be at least 1") @Max(value = 100, message = "Limit cannot exceed 100") Integer limit,
             @RequestParam(required = false, defaultValue = "0") @Min(value = 0, message = "Offset must be non-negative") Integer offset) {
-        List<Message> messages = messageService.getMessages(roomName, limit, offset);
-        return ResponseEntity.ok(messages);
+        List<MessageModel> messageModels = messageService.getMessages(roomName, limit, offset);
+        return ResponseEntity.ok(messageModels);
     }
 }

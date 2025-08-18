@@ -3,7 +3,7 @@ package ai.freightfox.chat.app.service;
 import ai.freightfox.chat.app.globalExceptionHandler.BadRequestException;
 import ai.freightfox.chat.app.globalExceptionHandler.ChatRoomNotFoundException;
 import ai.freightfox.chat.app.globalExceptionHandler.ResourceAlreadyExistException;
-import ai.freightfox.chat.app.model.ChatRoom;
+import ai.freightfox.chat.app.model.ChatRoomModel;
 import ai.freightfox.chat.app.repository.ChatRoomRepository;
 import ai.freightfox.chat.app.util.RedisKeyUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -26,15 +26,15 @@ public class ChatRoomService {
             throw new ResourceAlreadyExistException("Chat room '" + roomName + "' already exists");
         }
 
-        ChatRoom chatRoom = new ChatRoom(roomName);
+        ChatRoomModel chatRoomModel = new ChatRoomModel(roomName);
 
-        saveChatRoom(chatRoom);
+        saveChatRoom(chatRoomModel);
         log.info("Chat room: {} created successfully",  roomName);
     }
 
-    public void saveChatRoom(ChatRoom chatRoom) {
-        String hashKey = RedisKeyUtil.getRoomHashKey(chatRoom.getRoomName());
-        chatRoomRepository.saveChatRoom(chatRoom.getRoomName(), chatRoom.getCreatedAt(), hashKey);
+    public void saveChatRoom(ChatRoomModel chatRoomModel) {
+        String hashKey = RedisKeyUtil.getRoomHashKey(chatRoomModel.getRoomName());
+        chatRoomRepository.saveChatRoom(chatRoomModel.getRoomName(), chatRoomModel.getCreatedAt(), hashKey);
     }
 
     public boolean isRoomExists(String roomName) {
