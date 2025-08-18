@@ -1,6 +1,7 @@
 package ai.freightfox.chat.app.globalExceptionHandler;
 
 import ai.freightfox.chat.app.dto.response.ApiErrorResponse;
+import ai.freightfox.chat.app.globalExceptionHandler.exceptionHandlers.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -102,6 +103,20 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ParticipantNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleParticipantNotFound(
+            Exception ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Participant Doesn't exist",
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(apiErrorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(Exception.class)

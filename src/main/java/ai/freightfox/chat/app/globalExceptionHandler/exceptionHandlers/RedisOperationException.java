@@ -1,4 +1,4 @@
-package ai.freightfox.chat.app.globalExceptionHandler;
+package ai.freightfox.chat.app.globalExceptionHandler.exceptionHandlers;
 
 public class RedisOperationException extends RuntimeException {
     public RedisOperationException(String message, Throwable cause) {

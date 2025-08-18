@@ -1,7 +1,7 @@
 package ai.freightfox.chat.app.service;
 
 
-import ai.freightfox.chat.app.globalExceptionHandler.RedisOperationException;
+import ai.freightfox.chat.app.globalExceptionHandler.exceptionHandlers.RedisOperationException;
 import ai.freightfox.chat.app.model.MessageModel;
 import ai.freightfox.chat.app.util.RedisKeyUtil;
 import lombok.extern.slf4j.Slf4j;

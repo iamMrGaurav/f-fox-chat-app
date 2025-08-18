@@ -1,0 +1,385 @@
+{
+	"info": {
+		"name": "FreightFox Chat App - Raw WebSocket API",
+		"description": "Complete API collection for FreightFox Chat Application with Raw WebSocket testing support",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"version": "2.0.0"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "roomName",
+			"value": "test-room",
+			"type": "string"
+		},
+		{
+			"key": "participant",
+			"value": "john_doe",
+			"type": "string"
+		},
+		{
+			"key": "wsUrl",
+			"value": "ws://localhost:8080/ws",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Chat Room Management",
+			"item": [
+				{
+					"name": "Create Chat Room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roomName\": \"{{roomName}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", ""]
+						},
+						"description": "Creates a new chat room. Room name must be unique."
+					},
+					"response": []
+				},
+				{
+					"name": "Join Chat Room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participant\": \"{{participant}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/{{roomName}}/join",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", "{{roomName}}", "join"]
+						},
+						"description": "Join an existing chat room as a participant. Required before WebSocket connection."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Chat Room",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/{{roomName}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", "{{roomName}}"]
+						},
+						"description": "Delete an existing chat room and all its messages."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Message Management",
+			"item": [
+				{
+					"name": "Send Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participant\": \"{{participant}}\",\n  \"message\": \"Hello from REST API! This will be broadcasted to all WebSocket connections.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/{{roomName}}/messages",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", "{{roomName}}", "messages"]
+						},
+						"description": "Send a message to a chat room. This will be broadcasted to all connected WebSocket clients via Redis pub/sub."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Messages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/{{roomName}}/messages?limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", "{{roomName}}", "messages"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Retrieve recent messages from a chat room. Supports pagination with limit and offset parameters."
+					},
+					"response": []
+				},
+				{
+					"name": "Send Broadcast Test Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participant\": \"broadcast_tester\",\n  \"message\": \"Multi-pod broadcast test - {{$timestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/{{roomName}}/messages",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", "{{roomName}}", "messages"]
+						},
+						"description": "Send a timestamped test message to verify multi-pod broadcasting functionality."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Raw WebSocket Testing",
+			"item": [
+				{
+					"name": "Raw WebSocket - Connect to Room",
+					"request": {
+						"method": "WS",
+						"header": [],
+						"url": {
+							"raw": "ws://localhost:8080/ws?room={{roomName}}&participant={{participant}}",
+							"protocol": "ws",
+							"host": ["localhost"],
+							"port": "8080",
+							"path": ["ws"],
+							"query": [
+								{
+									"key": "room",
+									"value": "{{roomName}}"
+								},
+								{
+									"key": "participant",
+									"value": "{{participant}}"
+								}
+							]
+						},
+						"description": "🔌 **Raw WebSocket Connection**\n\n**Connection URL:** `ws://localhost:8080/ws?room={{roomName}}&participant={{participant}}`\n\n🔧 **How to Test in Postman:**\n1. Create new WebSocket request\n2. Set URL: `ws://localhost:8080/ws?room=test-room&participant=john_doe`\n3. Click **Connect**\n4. Connection establishes automatically (no handshake needed)\n\n📡 **What Happens:**\n- Server validates room exists and participant is member\n- WebSocket connection established\n- Session stored locally on server pod\n- Ready to receive broadcasted messages\n\n📨 **Message Format:**\nMessages sent via REST API will appear as JSON:\n```json\n{\n  \"message\": \"Hello World!\",\n  \"participant\": \"john_doe\",\n  \"timestamp\": \"2025-08-18T14:30:15.123456\"\n}\n```\n\n✅ **Advantages of Raw WebSocket:**\n- Simple connection process\n- No complex protocol overhead\n- Direct JSON message format\n- Easy to test and debug"
+					},
+					"response": []
+				},
+				{
+					"name": "WebSocket Testing Guide",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/{{roomName}}/messages",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", "{{roomName}}", "messages"]
+						},
+						"description": "🔌 **Raw WebSocket Testing Guide**\n\n**Prerequisites:**\n1. ✅ Create room: `POST /api/chatapp/chatrooms/`\n2. ✅ Join room: `POST /api/chatapp/chatrooms/{room}/join`\n3. ✅ Start Redis: `docker-compose -f redis-docker-compose.yml up`\n4. ✅ Start Spring Boot app: `./mvnw spring-boot:run`\n\n**WebSocket Connection Steps:**\n1. **In Postman:** New → WebSocket Request\n2. **URL:** `ws://localhost:8080/ws?room=test-room&participant=john_doe`\n3. **Click Connect** - connection establishes immediately\n4. **No handshake required** (unlike STOMP)\n\n**Test Message Broadcasting:**\n1. Keep WebSocket connection open\n2. Use REST API: `POST /api/chatapp/chatrooms/{room}/messages`\n3. Message appears instantly in WebSocket connection\n\n🌐 **Alternative Testing Methods:**\n- **Node.js Script:** `node raw-websocket-test.js`\n- **Browser Console:** `new WebSocket('ws://localhost:8080/ws?room=test&participant=user')`\n- **WebSocket libraries** in any programming language\n\n📋 **Expected Message Format:**\n```json\n{\n  \"message\": \"Your message content\",\n  \"participant\": \"sender_name\",\n  \"timestamp\": \"2025-08-18T14:30:15.123456\"\n}\n```\n\n🔥 **Multi-Pod Architecture:**\n- Each pod stores WebSocket sessions locally\n- Redis pub/sub distributes messages across all pods\n- All connected clients receive messages regardless of pod\n- Horizontal scaling supported\n\n🚀 **Load Testing:**\n- Single pod: ~5,000 concurrent connections\n- Multiple pods: Linear scaling\n- Redis pub/sub handles cross-pod communication"
+					},
+					"response": []
+				},
+				{
+					"name": "WebSocket Connection Troubleshooting",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/{{roomName}}/messages?limit=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", "{{roomName}}", "messages"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "1"
+								}
+							]
+						},
+						"description": "🔍 **WebSocket Connection Troubleshooting**\n\n**Common Issues & Solutions:**\n\n**❌ 403 Forbidden Error:**\n- **Cause:** Participant not member of room\n- **Solution:** First join room via `POST /api/chatapp/chatrooms/{room}/join`\n\n**❌ 404 Not Found Error:**\n- **Cause:** Room doesn't exist\n- **Solution:** Create room via `POST /api/chatapp/chatrooms/`\n\n**❌ 400 Bad Request Error:**\n- **Cause:** Missing room or participant parameter\n- **Solution:** Check URL format: `ws://localhost:8080/ws?room=test-room&participant=john`\n\n**❌ Connection Refused:**\n- **Cause:** Server not running\n- **Solution:** Start server with `./mvnw spring-boot:run`\n\n**❌ Messages Not Appearing:**\n- **Cause:** Redis not running\n- **Solution:** Start Redis with `docker-compose -f redis-docker-compose.yml up`\n\n**✅ Success Checklist:**\n1. HTTP 200 response from this endpoint\n2. WebSocket connection establishes without errors\n3. Server logs show: \"WebSocket connected: {sessionId}\"\n4. Messages sent via REST API appear in WebSocket\n5. Server logs show: \"Broadcasting to X local WebSocket sessions\"\n\n**🔧 Debug Commands:**\n- Check server status: `curl http://localhost:8080/api/chatapp/chatrooms/test-room/messages`\n- Test WebSocket: `node raw-websocket-test.js`\n- Check Redis: `redis-cli ping`"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Complete Workflow Test",
+			"item": [
+				{
+					"name": "Step 1 - Create Room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roomName\": \"workflow-test-room\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", ""]
+						},
+						"description": "**Step 1:** Create a new chat room for workflow testing."
+					},
+					"response": []
+				},
+				{
+					"name": "Step 2 - Join Room (User 1)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participant\": \"alice\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/workflow-test-room/join",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", "workflow-test-room", "join"]
+						},
+						"description": "**Step 2:** Join the room as Alice."
+					},
+					"response": []
+				},
+				{
+					"name": "Step 3 - Join Room (User 2)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participant\": \"bob\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/workflow-test-room/join",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", "workflow-test-room", "join"]
+						},
+						"description": "**Step 3:** Join the room as Bob."
+					},
+					"response": []
+				},
+				{
+					"name": "Step 4 - Connect WebSocket (Alice)",
+					"request": {
+						"method": "WS",
+						"header": [],
+						"url": {
+							"raw": "ws://localhost:8080/ws?room=workflow-test-room&participant=alice",
+							"protocol": "ws",
+							"host": ["localhost"],
+							"port": "8080",
+							"path": ["ws"],
+							"query": [
+								{
+									"key": "room",
+									"value": "workflow-test-room"
+								},
+								{
+									"key": "participant",
+									"value": "alice"
+								}
+							]
+						},
+						"description": "**Step 4:** Connect Alice via WebSocket. Keep this connection open."
+					},
+					"response": []
+				},
+				{
+					"name": "Step 5 - Send Message (Bob)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"participant\": \"bob\",\n  \"message\": \"Hello Alice! This message should appear in your WebSocket connection.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/workflow-test-room/messages",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", "workflow-test-room", "messages"]
+						},
+						"description": "**Step 5:** Bob sends a message via REST API. Alice should receive it via WebSocket."
+					},
+					"response": []
+				},
+				{
+					"name": "Step 6 - Verify Message History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/workflow-test-room/messages",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", "workflow-test-room", "messages"]
+						},
+						"description": "**Step 6:** Verify message was stored and can be retrieved via REST API."
+					},
+					"response": []
+				},
+				{
+					"name": "Step 7 - Cleanup (Delete Room)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/chatapp/chatrooms/workflow-test-room",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "chatapp", "chatrooms", "workflow-test-room"]
+						},
+						"description": "**Step 7:** Clean up by deleting the test room."
+					},
+					"response": []
+				}
+			],
+			"description": "🔄 **Complete Workflow Test**\n\nThis folder contains a complete end-to-end test workflow:\n\n1. **Create Room** → Set up chat room\n2. **Join Participants** → Add users to room\n3. **WebSocket Connect** → Establish real-time connection\n4. **Send Message** → Test broadcasting\n5. **Verify Storage** → Check message persistence\n6. **Cleanup** → Remove test data\n\n**Expected Results:**\n- All API calls return HTTP 200\n- WebSocket connection establishes successfully\n- Message appears in WebSocket connection in real-time\n- Message is stored and retrievable via GET API\n- Multi-pod broadcasting works across all pods"
+		}
+	]
+}

@@ -1,4 +1,4 @@
-package ai.freightfox.chat.app.globalExceptionHandler;
+package ai.freightfox.chat.app.globalExceptionHandler.exceptionHandlers;
 
 public class ChatRoomNotFoundException extends RuntimeException {
     public ChatRoomNotFoundException(String message) {

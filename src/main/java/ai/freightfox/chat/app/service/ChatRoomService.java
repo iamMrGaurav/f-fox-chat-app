@@ -1,8 +1,8 @@
 package ai.freightfox.chat.app.service;
 
-import ai.freightfox.chat.app.globalExceptionHandler.BadRequestException;
-import ai.freightfox.chat.app.globalExceptionHandler.ChatRoomNotFoundException;
-import ai.freightfox.chat.app.globalExceptionHandler.ResourceAlreadyExistException;
+import ai.freightfox.chat.app.globalExceptionHandler.exceptionHandlers.BadRequestException;
+import ai.freightfox.chat.app.globalExceptionHandler.exceptionHandlers.ChatRoomNotFoundException;
+import ai.freightfox.chat.app.globalExceptionHandler.exceptionHandlers.ResourceAlreadyExistException;
 import ai.freightfox.chat.app.model.ChatRoomModel;
 import ai.freightfox.chat.app.repository.ChatRoomRepository;
 import ai.freightfox.chat.app.util.RedisKeyUtil;
@@ -86,15 +86,15 @@ public class ChatRoomService {
 
     public boolean isParticipantInRoom(String roomName, String participantName) {
         if (!isRoomExists(roomName)) {
-            return false;
+            return true;
         }
 
         if (participantName == null || participantName.trim().isEmpty()) {
-            return false;
+            return true;
         }
 
         String participantRoomHashKey = RedisKeyUtil.getParticipantRoomHashKey(roomName);
-        return chatRoomRepository.isParticipantInRoom(participantRoomHashKey, participantName.trim());
+        return !chatRoomRepository.isParticipantInRoom(participantRoomHashKey, participantName.trim());
     }
 
     public long getParticipantCount(String roomName) {
@@ -141,7 +141,7 @@ public class ChatRoomService {
         
         chatRoomRepository.removeRemoveRoomData(roomKey, participantKey, messageRoomKey);
         
-        log.info("Successfully deleted room '{}'", roomName);
+        log.info("Successfully deleted room {}", roomName);
     }
 
 }

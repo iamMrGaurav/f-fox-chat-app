@@ -1,7 +1,7 @@
 package ai.freightfox.chat.app.repository;
 
-import ai.freightfox.chat.app.globalExceptionHandler.RedisOperationException;
-import ai.freightfox.chat.app.globalExceptionHandler.ResourceAlreadyExistException;
+import ai.freightfox.chat.app.globalExceptionHandler.exceptionHandlers.RedisOperationException;
+import ai.freightfox.chat.app.globalExceptionHandler.exceptionHandlers.ResourceAlreadyExistException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
