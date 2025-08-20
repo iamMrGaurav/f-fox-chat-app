@@ -1,4 +1,4 @@
-# FreightFox Chat Application
+# F-Fox Chat Application
 
 ## Features
 
