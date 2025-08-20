@@ -11,7 +11,7 @@
 - Health check endpoints
 - Comprehensive error handling
 - Input validation
-- Comprehensive unit testing (46+ tests)
+- Comprehensive unit testing
 
 ## Prerequisites
 
@@ -355,34 +355,5 @@ ws.onmessage = (event) => {
 4. Messages published to Redis pub/sub
 5. All connected clients receive real-time updates
 
-## Troubleshooting
 
-### Common Issues
 
-1. **Redis Connection Failed**
-   - Verify Redis is running: `redis-cli ping`
-   - Check host and port configuration
-   - Ensure Redis is accessible from application
-
-2. **WebSocket Connection Failed**
-   - Check if port 8080 is available
-   - Verify WebSocket URL format
-   - Check browser console for errors
-
-3. **Application Won't Start**
-   - Check Java version (requires Java 21+)
-   - Verify Redis connection
-   - Check port 8080 availability
-
-## Performance
-
-### Redis Configuration
-- **Connection pooling** with configurable pool sizes
-- **Pub/Sub** for real-time messaging
-- **Lists** for message history storage
-- **TTL** support for automatic cleanup
-
-### Scaling
-- **Horizontal scaling** supported through Redis pub/sub
-- **Load balancer** compatible
-- **Session-less** design for stateless scaling
