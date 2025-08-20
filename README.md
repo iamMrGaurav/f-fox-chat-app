@@ -11,6 +11,7 @@
 - Health check endpoints
 - Comprehensive error handling
 - Input validation
+- Comprehensive unit testing (46+ tests)
 
 ## Prerequisites
 
@@ -44,6 +45,12 @@ curl -sSL https://raw.githubusercontent.com/your-repo/freight-fox-chat-app/main/
 ```bash
 # Just Docker with Redis
 ./docker-run.sh
+```
+
+### Unit Tests Only (No Redis Required)
+```bash
+# Run comprehensive unit tests
+./quick-start.sh  # Choose option 3
 ```
 
 ## Local Development Setup
@@ -218,11 +225,51 @@ spring.data.redis.jedis.pool.min-idle=0
 
 ### Running Tests
 ```bash
-# Run all tests
+# Run all tests (requires Redis running)
 mvn test
 
-# Run with coverage
+# Run specific test class
+mvn test -Dtest=ChatRoomServiceTest
+
+# Run specific test method
+mvn test -Dtest=MessageServiceTest#saveMessage_WithValidParameters_SavesSuccessfully
+
+# Run service unit tests only (no Redis required)
+mvn test -Dtest="ChatRoomServiceTest,MessageServiceTest"
+
+# Run tests with coverage
 mvn test jacoco:report
+
+# Run tests with verbose output
+mvn test -Dtest="ChatRoomServiceTest,MessageServiceTest" -Dmaven.test.failure.ignore=true
+
+# Skip tests during build
+mvn clean package -DskipTests
+```
+
+### Unit Test Coverage
+The application includes comprehensive unit tests for chat services:
+
+- **46+ test methods** covering all service functionality
+- **ChatRoomService tests (24 methods)** - room creation, participants, validation
+- **MessageService tests (22 methods)** - message saving, retrieval, pagination
+- **Application context test** - Spring Boot integration (requires Redis)
+
+**Key test files:**
+- `src/test/java/.../service/ChatRoomServiceTest.java` - Chat room operations unit tests
+- `src/test/java/.../service/MessageServiceTest.java` - Message service unit tests
+- `src/test/java/.../DemoApplicationTests.java` - Application context test
+
+### Running Unit Tests in Docker
+```bash
+# Build test image
+docker build --target test -f Dockerfile.test -t freight-fox-chat:test .
+
+# Run tests in container
+docker run freight-fox-chat:test
+
+# Or run with Maven in existing container
+docker run -v $(pwd):/app -w /app openjdk:21-jdk mvn test -Dtest="ChatRoomServiceTest,MessageServiceTest"
 ```
 
 ### Building for Production
