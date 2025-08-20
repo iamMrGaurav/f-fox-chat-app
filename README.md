@@ -30,6 +30,13 @@ You need Redis running before starting the application. You can use:
 
 Default connection: `localhost:6379`
 
+## Postman Collection
+
+You can use the following links to access the Postman collection for this project:
+
+1. [API-Collection](https://github.com/iamMrGaurav/f-fox-chat-app/blob/main/postman-collection.json)
+2. [WebSocket](https://orange-station-108385.postman.co/workspace/My-Workspace~e5aa16b9-1b4b-4a85-8c59-9deb007b20c1/collection/67fbd689be3dfe9bc0f646f5?action=share&creator=23006953)
+
 ## Quick Start (Recommended)
 
 ### One-Command Setup
@@ -145,6 +152,7 @@ Access Swagger UI at: `http://localhost:8080/swagger-ui.html`
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Health check |
+
 
 ## Usage Examples
 

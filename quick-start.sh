@@ -77,6 +77,13 @@ run_with_docker() {
         echo "Please install Docker from: https://docs.docker.com/get-docker/"
         exit 1
     fi
+
+    # Check if docker-compose is installed
+    if ! command_exists docker-compose; then
+        print_error "docker-compose is not installed!"
+        echo "Please install docker-compose. See: https://docs.docker.com/compose/install/"
+        exit 1
+    fi
     
     # Check if Docker is running
     if ! docker info >/dev/null 2>&1; then
@@ -86,15 +93,8 @@ run_with_docker() {
     fi
     
     # Start Redis if not running
-    print_info "Starting Redis container..."
-    docker stop freight-fox-redis 2>/dev/null || true
-    docker rm freight-fox-redis 2>/dev/null || true
-    
-    docker run -d \
-        --name freight-fox-redis \
-        -p $REDIS_PORT:6379 \
-        redis:7-alpine \
-        redis-server --appendonly yes
+    print_info "Starting Redis container using docker-compose..."
+    docker-compose -f redis-docker-compose.yml up -d
     
     print_status "Redis container started"
     
@@ -117,7 +117,7 @@ run_with_docker() {
     docker run -d \
         --name freight-fox-chat \
         -p $APP_PORT:8080 \
-        --link freight-fox-redis:redis \
+        --network freight-fox-chat-app_freight-fox-network \
         -e SPRING_DATA_REDIS_HOST=redis \
         -e SPRING_DATA_REDIS_PORT=6379 \
         $ECR_IMAGE
@@ -155,7 +155,7 @@ run_with_java() {
     
     # Check Java version
     if command_exists java; then
-        java_version=$(java -version 2>&1 | head -n1 | cut -d'"' -f2 | cut -d'.' -f1)
+        java_version=$(java -version 2>&1 | head -n1 | cut -d'\"' -f2 | cut -d'.' -f1)
         if [ "$java_version" -ge 21 ] 2>/dev/null; then
             print_status "Java $java_version found"
         else
@@ -241,7 +241,7 @@ run_unit_tests() {
     
     # Check Java version
     if command_exists java; then
-        java_version=$(java -version 2>&1 | head -n1 | cut -d'"' -f2 | cut -d'.' -f1)
+        java_version=$(java -version 2>&1 | head -n1 | cut -d'\"' -f2 | cut -d'.' -f1)
         if [ "$java_version" -ge 21 ] 2>/dev/null; then
             print_status "Java $java_version found"
         else
@@ -303,7 +303,7 @@ run_unit_tests() {
         echo "✓ Application context test"
         echo ""
         echo "Test Coverage:"
-        echo "=============="
+        echo "==============="
         echo "• Chat room operations (creation, validation, participants)"
         echo "• Message operations (saving, retrieval, pagination)"
         echo "• Validation and error handling"
@@ -331,35 +331,35 @@ show_final_info() {
     echo "Health Check: http://localhost:$APP_PORT/health"
     echo ""
     echo "Configuration:"
-    echo "=============="
+    echo "==============="
     echo "Redis Host: $SPRING_DATA_REDIS_HOST"
     echo "Redis Port: $SPRING_DATA_REDIS_PORT"
     echo ""
     echo "Quick Test Commands:"
     echo "==================="
     echo "# Create a chat room"
-    echo "curl -X POST \"http://localhost:$APP_PORT/api/chatapp/chatrooms/\" \\"
-    echo "  -H \"Content-Type: application/json\" \\"
-    echo "  -d '{\"roomName\":\"general\"}'"
+    echo "curl -X POST \"http://localhost:$APP_PORT/api/chatapp/chatrooms/\" \\
+  -H \"Content-Type: application/json\" \\
+  -d '{\"roomName\":\"general\"}'"
     echo ""
     echo "# Join the room"
-    echo "curl -X POST \"http://localhost:$APP_PORT/api/chatapp/chatrooms/general/join\" \\"
-    echo "  -H \"Content-Type: application/json\" \\"
-    echo "  -d '{\"participant\":\"john\"}'"
+    echo "curl -X POST \"http://localhost:$APP_PORT/api/chatapp/chatrooms/general/join\" \\
+  -H \"Content-Type: application/json\" \\
+  -d '{\"participant\":\"john\"}'"
     echo ""
     echo "# Send a message"
-    echo "curl -X POST \"http://localhost:$APP_PORT/api/chatapp/messages/\" \\"
-    echo "  -H \"Content-Type: application/json\" \\"
-    echo "  -d '{\"room\":\"general\",\"participant\":\"john\",\"message\":\"Hello!\"}'"
+    echo "curl -X POST \"http://localhost:$APP_PORT/api/chatapp/messages/\" \\
+  -H \"Content-Type: application/json\" \\
+  -d '{\"room\":\"general\",\"participant\":\"john\",\"message\":\"Hello!\"}'"
     echo ""
     if [ "$choice" = "1" ]; then
         echo "Docker Management:"
         echo "=================="
         echo "# View chat app logs: docker logs freight-fox-chat"
         echo "# View Redis logs: docker logs freight-fox-redis"
-        echo "# Stop apps: docker stop freight-fox-chat freight-fox-redis"
-        echo "# Start apps: docker start freight-fox-redis freight-fox-chat"
-        echo "# Remove apps: docker rm freight-fox-chat freight-fox-redis"
+        echo "# Stop apps: docker stop freight-fox-chat && docker-compose -f redis-docker-compose.yml down"
+        echo "# Start apps: docker-compose -f redis-docker-compose.yml up -d && docker start freight-fox-chat"
+        echo "# Remove apps: docker rm freight-fox-chat && docker-compose -f redis-docker-compose.yml down"
     else
         echo "Java Management:"
         echo "==============="
