@@ -4,7 +4,7 @@
 
 - Create and manage chat rooms
 - Real-time messaging with WebSocket
-- Redis pub/sub for scalability
+- Redis pub/sub
 - Participant management
 - Message history persistence
 - RESTful API endpoints
